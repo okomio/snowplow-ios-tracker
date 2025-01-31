@@ -25,8 +25,6 @@ class Session {
     private(set) var foregroundIndex = 0
     /// The background index count
     private(set) var backgroundIndex = 0
-    /// The event index
-    private(set) var eventIndex = 0
     /// The current tracker associated with the session
     private(set) weak var tracker: Tracker?
     /// Returns the current session state
@@ -41,7 +39,6 @@ class Session {
 
     private var isNewSession = true
     private var isSessionCheckerEnabled = false
-    private var lastSessionCheck: NSNumber = Utilities.getTimestamp()
     private var dataPersistence: DataPersistence?
 
     /// Initializes a newly allocated SnowplowSession
@@ -124,21 +121,20 @@ class Session {
         var context: [String : Any]? = nil
         objc_sync_enter(self)
         if isSessionCheckerEnabled {
-            if shouldUpdate() {
-                update(eventId: eventId, eventTimestamp: eventTimestamp)
+            if shouldStartNewSession() {
+                startNewSession(eventId: eventId, eventTimestamp: eventTimestamp)
                 if let onSessionStateUpdate = onSessionStateUpdate, let state = state {
                     DispatchQueue.global(qos: .default).async {
                         onSessionStateUpdate(state)
                     }
                 }
             }
-            lastSessionCheck = Utilities.getTimestamp()
         }
 
-        eventIndex += 1
-
+        state?.incrementEventIndex(isSessionCheckerEnabled: isSessionCheckerEnabled)
+        dataPersistence?.session = state?.sessionContext
+        
         context = state?.sessionContext
-        context?[kSPSessionEventIndex] = NSNumber(value: eventIndex)
         objc_sync_exit(self)
 
         if userAnonymisation {
@@ -174,27 +170,32 @@ class Session {
         return userId
     }
 
-    private func shouldUpdate() -> Bool {
+    private func shouldStartNewSession() -> Bool {
         if isNewSession {
             return true
         }
-        let lastAccess = lastSessionCheck.int64Value
-        let now = Utilities.getTimestamp().int64Value
-        let timeout = inBackground ? backgroundTimeout : foregroundTimeout
-        return now < lastAccess || Int(now - lastAccess) > timeout
+        if let lastAccess = state?.lastUpdate {
+            let now = Utilities.getTimestamp().int64Value
+            let timeout = inBackground ? backgroundTimeout : foregroundTimeout
+            return now < lastAccess || Int(now - lastAccess) > timeout
+        }
+        return true
     }
 
-    private func update(eventId: String?, eventTimestamp: Int64) {
+    private func startNewSession(eventId: String?, eventTimestamp: Int64) {
         isNewSession = false
         let sessionIndex = (state?.sessionIndex ?? 0) + 1
+        let eventIndex = 0
         let eventISOTimestamp = Utilities.timestamp(toISOString: eventTimestamp)
         state = SessionState(
             firstEventId: eventId,
             firstEventTimestamp: eventISOTimestamp,
-            currentSessionId: Utilities.getUUIDString(),
+            sessionId: Utilities.getUUIDString(),
             previousSessionId: state?.sessionId,
             sessionIndex: sessionIndex,
             userId: userId,
+            eventIndex: eventIndex,
+            lastUpdate: Utilities.getTimestamp().int64Value,
             storage: "LOCAL_STORAGE")
         var sessionToPersist = state?.sessionContext
         // Remove previousSessionId if nil because dictionaries with nil values aren't plist serializable
@@ -205,7 +206,6 @@ class Session {
             sessionToPersist = sessionCopy
         }
         dataPersistence?.session = sessionToPersist
-        eventIndex = 0
     }
 
     @objc func updateInBackground() {

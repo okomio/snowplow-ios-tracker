@@ -135,7 +135,7 @@ class AVPlayerSubscription {
         positionObserverToken =
             player.addPeriodicTimeObserver(forInterval: interval, queue: .main) {
                 [weak self] _ in
-                self?.update()
+                self?.startNewSession()
         }
     }
 
