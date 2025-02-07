@@ -36,8 +36,10 @@ class Session {
     public var foregroundTimeout = TrackerDefaults.foregroundTimeout
     /// The currently set Background Timeout in milliseconds
     public var backgroundTimeout = TrackerDefaults.backgroundTimeout
+    
+    public var isPersistentSession = TrackerDefaults.isPersistentSession
 
-    private var isNewSession = true
+    private var isNewSession: Bool
     private var isSessionCheckerEnabled = false
     private var dataPersistence: DataPersistence?
 
@@ -46,21 +48,24 @@ class Session {
     ///   - foregroundTimeout: the session timeout while it is in the foreground
     ///   - backgroundTimeout: the session timeout while it is in the background
     /// - Returns: a SnowplowSession
-    convenience init(foregroundTimeout: Int, andBackgroundTimeout backgroundTimeout: Int) {
-        self.init(foregroundTimeout: foregroundTimeout, andBackgroundTimeout: backgroundTimeout, andTracker: nil)
+    convenience init(foregroundTimeout: Int, andBackgroundTimeout backgroundTimeout: Int, andIsPersistentSession isPersistentSession: Bool) {
+        self.init(foregroundTimeout: foregroundTimeout, andBackgroundTimeout: backgroundTimeout, andIsPersistentSession: isPersistentSession, andTracker: nil)
     }
 
     /// Initializes a newly allocated SnowplowSession
     /// - Parameters:
     ///   - foregroundTimeout: the session timeout while it is in the foreground
     ///   - backgroundTimeout: the session timeout while it is in the background
+    ///   - isPersistentSession: re-use previous session on restart
     ///   - tracker: reference to the associated tracker of the session
     /// - Returns: a SnowplowSession
-    init(foregroundTimeout: Int, andBackgroundTimeout backgroundTimeout: Int, andTracker tracker: Tracker?) {
+    init(foregroundTimeout: Int, andBackgroundTimeout backgroundTimeout: Int, andIsPersistentSession isPersistentSession: Bool, andTracker tracker: Tracker?) {
         
         self.foregroundTimeout = foregroundTimeout * 1000
         self.backgroundTimeout = backgroundTimeout * 1000
+        self.isPersistentSession = isPersistentSession
         self.tracker = tracker
+        self.isNewSession = !isPersistentSession
         if let namespace = tracker?.trackerNamespace {
             dataPersistence = DataPersistence.getFor(namespace: namespace)
         }
@@ -132,9 +137,11 @@ class Session {
         }
 
         state?.incrementEventIndex(isSessionCheckerEnabled: isSessionCheckerEnabled)
-        dataPersistence?.session = state?.sessionContext
+        if isPersistentSession {
+            dataPersistence?.session = state?.sessionContext
+        }
         
-        context = state?.sessionContext
+        context = state?.sessionContextOrig
         objc_sync_exit(self)
 
         if userAnonymisation {

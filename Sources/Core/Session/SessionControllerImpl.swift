@@ -101,6 +101,21 @@ class SessionControllerImpl: Controller, SessionController {
             session?.onSessionStateUpdate = newValue
         }
     }
+    
+    var isPersistentSession: Bool {
+        get {
+            if !isEnabled {
+                logDiagnostic(message: "Attempt to access SessionController fields when disabled")
+                return false
+            }
+            return session?.isPersistentSession ?? TrackerDefaults.isPersistentSession
+        }
+        set {
+            dirtyConfig.isPersistentSession = newValue
+            session?.isPersistentSession = newValue
+        }
+
+    }
 
     var sessionIndex: Int {
         if !isEnabled {

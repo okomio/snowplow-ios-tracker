@@ -252,6 +252,15 @@ public class TrackerConfiguration: SerializableConfiguration, TrackerConfigurati
         set { _platformContextProperties = newValue }
     }
     
+    
+    private var _isPersistentSession: Bool?
+    /// If enabled, then it re-uses previous session after restart
+    @objc
+    public var isPersistentSession: Bool {
+        get { return _isPersistentSession ?? sourceConfig?.isPersistentSession ?? TrackerDefaults.isPersistentSession }
+        set { _isPersistentSession = newValue }
+    }
+    
     // MARK: - Internal
     
     /// Fallback configuration to read from in case requested values are not present in this configuraiton.
@@ -327,6 +336,9 @@ public class TrackerConfiguration: SerializableConfiguration, TrackerConfigurati
         }
         if let userAnonymisation = dictionary["userAnonymisation"] as? Bool {
             self.userAnonymisation = userAnonymisation
+        }
+        if let isPersistentSession = dictionary["isPersistentSession"] as? Bool {
+            self.isPersistentSession = isPersistentSession
         }
     }
 
@@ -474,6 +486,12 @@ public class TrackerConfiguration: SerializableConfiguration, TrackerConfigurati
         self.advertisingIdentifierRetriever = retriever
         return self
     }
+    
+    @objc
+    public func isPersistentSession(_ isPersistentSession: Bool) -> Self {
+        self.isPersistentSession = isPersistentSession
+        return self
+    }
 
     // MARK: - NSCopying
 
@@ -500,6 +518,7 @@ public class TrackerConfiguration: SerializableConfiguration, TrackerConfigurati
         copy.trackerVersionSuffix = trackerVersionSuffix
         copy.userAnonymisation = userAnonymisation
         copy.advertisingIdentifierRetriever = advertisingIdentifierRetriever
+        copy.isPersistentSession = isPersistentSession
         return copy
     }
 
@@ -528,6 +547,7 @@ public class TrackerConfiguration: SerializableConfiguration, TrackerConfigurati
         coder.encode(diagnosticAutotracking, forKey: "diagnosticAutotracking")
         coder.encode(trackerVersionSuffix, forKey: "trackerVersionSuffix")
         coder.encode(userAnonymisation, forKey: "userAnonymisation")
+        coder.encode(isPersistentSession, forKey: "isPersistentSession")
     }
 
     required init?(coder: NSCoder) {
@@ -560,5 +580,6 @@ public class TrackerConfiguration: SerializableConfiguration, TrackerConfigurati
             self.trackerVersionSuffix = trackerVersionSuffix
         }
         userAnonymisation = coder.decodeBool(forKey: "userAnonymisation")
+        isPersistentSession = coder.decodeBool(forKey: "isPersistentSession")
     }
 }

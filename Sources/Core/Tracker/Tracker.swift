@@ -164,6 +164,7 @@ class Tracker: NSObject {
                 session = Session(
                     foregroundTimeout: foregroundTimeout,
                     andBackgroundTimeout: backgroundTimeout,
+                    andIsPersistentSession: isPersistentSession,
                     andTracker: self)
             }
         }
@@ -229,6 +230,19 @@ class Tracker: NSObject {
             _backgroundTimeout = backgroundTimeout
             if builderFinished && session != nil {
                 session?.backgroundTimeout = backgroundTimeout
+            }
+        }
+    }
+    
+    private var _isPersistentSession = TrackerDefaults.isPersistentSession
+    var isPersistentSession: Bool {
+        get {
+            return _isPersistentSession
+        }
+        set(isPersistentSession) {
+            _isPersistentSession = isPersistentSession
+            if builderFinished && session != nil {
+                session?.isPersistentSession = isPersistentSession
             }
         }
     }
@@ -314,6 +328,7 @@ class Tracker: NSObject {
             session = Session(
                 foregroundTimeout: foregroundTimeout,
                 andBackgroundTimeout: backgroundTimeout,
+                andIsPersistentSession: isPersistentSession,
                 andTracker: self)
         }
 

@@ -37,6 +37,11 @@ public class SessionState: NSObject, State {
     var sessionContext: [String : Any] {
         return sessionDictionary
     }
+    var sessionContextOrig: [String : Any] {
+        var copy = sessionDictionary
+        copy.removeValue(forKey: kSPSessionLastUpdate)
+        return copy
+    }
     private var sessionDictionary: [String : Any] = [:]
 
     private func setupSessionContext() {
@@ -102,7 +107,6 @@ public class SessionState: NSObject, State {
         if isSessionCheckerEnabled {
             self.lastUpdate = Utilities.getTimestamp().int64Value
             self.sessionDictionary[kSPSessionLastUpdate] = self.lastUpdate
-            
         }
     }
 }

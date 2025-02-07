@@ -292,6 +292,7 @@ class ServiceProvider: NSObject, ServiceProviderProtocol {
             tracker.trackerDiagnostic = trackerConfiguration.diagnosticAutotracking
             tracker.userAnonymisation = trackerConfiguration.userAnonymisation
             tracker.advertisingIdentifierRetriever = trackerConfiguration.advertisingIdentifierRetriever
+            tracker.isPersistentSession = trackerConfiguration.isPersistentSession
             if gdprConfiguration.sourceConfig != nil {
                 tracker.gdprContext = GDPRContext(
                     basis: gdprConfiguration.basisForProcessing,

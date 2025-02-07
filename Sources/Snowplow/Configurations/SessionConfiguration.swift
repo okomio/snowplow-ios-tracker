@@ -84,6 +84,13 @@ public class SessionConfiguration: SerializableConfiguration, SessionConfigurati
         get { return _onSessionStateUpdate ?? sourceConfig?.onSessionStateUpdate }
         set { _onSessionStateUpdate = newValue }
     }
+    
+    private var _isPersistentSession: Bool?
+    @objc
+    public var isPersistentSession: Bool {
+        get { return _isPersistentSession ?? sourceConfig?.isPersistentSession ?? TrackerDefaults.isPersistentSession }
+        set { _isPersistentSession = newValue }
+    }
 
     @objc
     public override init() {
