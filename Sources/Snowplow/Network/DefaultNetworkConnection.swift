@@ -12,6 +12,7 @@
 //  language governing permissions and limitations there under.
 
 import Foundation
+import GZIP
 
 @objc(SPDefaultNetworkConnection)
 public class DefaultNetworkConnection: NSObject, NetworkConnection {
@@ -86,6 +87,8 @@ public class DefaultNetworkConnection: NSObject, NetworkConnection {
     /// Whether to anonymise server-side user identifiers including the `network_userid` and `user_ipaddress`
     @objc
     public var serverAnonymisation = false
+    /// Whether to use gzip encoding for POST requests
+    public var enableContentEncoding: Bool? = false
     private var dataOperationQueue = OperationQueue()
     private var builderFinished = false
     
@@ -203,8 +206,18 @@ public class DefaultNetworkConnection: NSObject, NetworkConnection {
         if let requestHeaders = requestHeaders {
             applyValuesAndHeaderFields(requestHeaders, to: &urlRequest)
         }
+        
+        var httpBody: Data? = requestData
+        if enableContentEncoding ?? false {
+            if let requestData = requestData {
+                let nsData = NSData(data: requestData)
+                httpBody = nsData.gzippedData(withCompressionLevel: 0.3)
+                urlRequest.setValue("gzip", forHTTPHeaderField: "Content-Encoding")
+            }
+        }
+
         urlRequest.httpMethod = "POST"
-        urlRequest.httpBody = requestData
+        urlRequest.httpBody = httpBody
         return urlRequest
     }
 

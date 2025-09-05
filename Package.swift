@@ -18,11 +18,12 @@ let package = Package(
     dependencies: [
         .package(name: "FMDB", url: "https://github.com/ccgus/fmdb", from: "2.7.6"),
         .package(name: "Mocker", url: "https://github.com/WeTransfer/Mocker.git", from: "2.5.4"),
+        .package(name: "GZIP", url: "git@github.com:nicklockwood/GZIP.git", from: "1.3.2"),
     ],
     targets: [
         .target(
             name: "SnowplowTracker",
-            dependencies: ["FMDB"],
+            dependencies: ["FMDB", "GZIP"],
             path: "./Sources"),
         .testTarget(
             name: "Tests",

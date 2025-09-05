@@ -28,4 +28,5 @@ Pod::Spec.new do |s|
     s.pod_target_xcconfig = { "DEFINES_MODULE" => "YES" }
   
     s.dependency 'FMDB', '~> 2.7'
+    s.dependency 'GZIP', '~> 1.3.2'
   end

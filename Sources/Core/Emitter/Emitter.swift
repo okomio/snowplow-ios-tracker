@@ -212,6 +212,20 @@ class Emitter: NSObject, EmitterEventProcessing {
             }
         }
     }
+    
+    /// Enable gzip encoding for POST
+    private var _enableContentEncoding: Bool?
+    var enableContentEncoding: Bool? {
+        get {
+            return _enableContentEncoding
+        }
+        set(enableContentEncoding) {
+            _enableContentEncoding = enableContentEncoding
+            if builderFinished && networkConnection != nil {
+                setupNetworkConnection()
+            }
+        }
+    }
 
     private var _networkConnection: NetworkConnection?
     /// Custom NetworkConnection istance to handle connection outside the emitter.
@@ -305,6 +319,7 @@ class Emitter: NSObject, EmitterEventProcessing {
             defaultNetworkConnection.byteLimitGet = byteLimitGet
             defaultNetworkConnection.byteLimitPost = byteLimitPost
             defaultNetworkConnection.serverAnonymisation = serverAnonymisation
+            defaultNetworkConnection.enableContentEncoding = enableContentEncoding
             _networkConnection = defaultNetworkConnection
         }
     }
