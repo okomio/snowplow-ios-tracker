@@ -41,6 +41,9 @@ public protocol EmitterConfigurationProtocol: AnyObject {
     /// Whether to anonymise server-side user identifiers including the `network_userid` and `user_ipaddress`
     @objc
     var serverAnonymisation: Bool { get set }
+    @objc
+    /// Whether to enable gzip payload encoding for POST requests
+    var enableContentEncoding: Bool { get set }
     /// Whether to retry sending events that failed to be sent to the collector.
     /// If disabled, events that failed to be sent will be dropped regardless of other configuration (such as the customRetryForStatusCodes).
     @objc
@@ -117,6 +120,13 @@ public class EmitterConfiguration: SerializableConfiguration, EmitterConfigurati
         get { return _serverAnonymisation ?? sourceConfig?.serverAnonymisation ?? EmitterDefaults.serverAnonymisation }
         set { _serverAnonymisation = newValue }
     }
+    
+    private var _enableContentEncoding: Bool?
+    @objc
+    public var enableContentEncoding: Bool {
+        get { return _enableContentEncoding ?? sourceConfig?.enableContentEncoding ?? EmitterDefaults.enableContentEncoding }
+        set { _enableContentEncoding = newValue }
+    }
 
     private var _eventStore: EventStore?
     /// Custom component with full ownership for persisting events before to be sent to the collector.
@@ -155,6 +165,7 @@ public class EmitterConfiguration: SerializableConfiguration, EmitterConfigurati
     ///         byteLimitGet = 40000;
     ///         byteLimitPost = 40000;
     ///         serverAnonymisation = false;
+    ///         enableContentEncoding = false;
     @objc
     public override init() {
         super.init()
@@ -178,6 +189,7 @@ public class EmitterConfiguration: SerializableConfiguration, EmitterConfigurati
             )
         }
         self._serverAnonymisation = dictionary["serverAnonymisation"] as? Bool
+        self._enableContentEncoding = dictionary["enableContentEncoding"] as? Bool
         self._retryFailedRequests = dictionary["retryFailedRequests"] as? Bool
     }
 
@@ -241,6 +253,13 @@ public class EmitterConfiguration: SerializableConfiguration, EmitterConfigurati
         self.serverAnonymisation = serverAnonymisation
         return self
     }
+    
+    /// Whether to use gzip payload compression for POST requests
+    @objc
+    public func enableContentEncoding(_ enableContentEncoding: Bool) -> Self {
+        self.enableContentEncoding = enableContentEncoding
+        return self
+    }
 
     /// Custom component with full ownership for persisting events before to be sent to the collector.
     /// If it's not set the tracker will use a SQLite database as default EventStore.
@@ -271,6 +290,7 @@ public class EmitterConfiguration: SerializableConfiguration, EmitterConfigurati
         copy.requestCallback = requestCallback
         copy.customRetryForStatusCodes = customRetryForStatusCodes
         copy.serverAnonymisation = serverAnonymisation
+        copy.enableContentEncoding = enableContentEncoding
         copy.eventStore = eventStore
         copy.retryFailedRequests = retryFailedRequests
         return copy
@@ -290,6 +310,7 @@ public class EmitterConfiguration: SerializableConfiguration, EmitterConfigurati
         coder.encode(byteLimitPost, forKey: "byteLimitPost")
         coder.encode(customRetryForStatusCodes, forKey: "customRetryForStatusCodes")
         coder.encode(serverAnonymisation, forKey: "serverAnonymisation")
+        coder.encode(enableContentEncoding, forKey: "enableContentEncoding")
         coder.encode(retryFailedRequests, forKey: "retryFailedRequests")
     }
 
@@ -306,6 +327,7 @@ public class EmitterConfiguration: SerializableConfiguration, EmitterConfigurati
             customRetryForStatusCodes = retryCodes
         }
         serverAnonymisation = coder.decodeBool(forKey: "serverAnonymisation")
+        enableContentEncoding = coder.decodeBool(forKey: "enableContentEncoding")
         if coder.containsValue(forKey: "retryFailedRequests") {
             retryFailedRequests = coder.decodeBool(forKey: "retryFailedRequests")
         }

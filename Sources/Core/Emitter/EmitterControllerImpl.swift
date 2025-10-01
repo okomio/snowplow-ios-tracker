@@ -56,6 +56,16 @@ class EmitterControllerImpl: Controller, EmitterController {
             emitter.serverAnonymisation = newValue
         }
     }
+    
+    var enableContentEncoding: Bool {
+        get {
+            return emitter.enableContentEncoding
+        }
+        set {
+            dirtyConfig.enableContentEncoding = newValue
+            emitter.enableContentEncoding = newValue
+        }
+    }
 
     var emitRange: Int {
         get {

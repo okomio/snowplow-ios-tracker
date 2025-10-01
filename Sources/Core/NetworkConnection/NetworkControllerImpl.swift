@@ -59,16 +59,6 @@ class NetworkControllerImpl: Controller, NetworkController {
             emitter.requestHeaders = newValue
         }
     }
-    
-    var enableContentEncoding: Bool? {
-        get {
-            return emitter.enableContentEncoding
-        }
-        set {
-            dirtyConfig.enableContentEncoding = enableContentEncoding
-            emitter.enableContentEncoding = newValue
-        }
-    }
 
     // MARK: - Private methods
 

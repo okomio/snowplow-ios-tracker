@@ -88,7 +88,8 @@ public class DefaultNetworkConnection: NSObject, NetworkConnection {
     @objc
     public var serverAnonymisation = false
     /// Whether to use gzip encoding for POST requests
-    public var enableContentEncoding: Bool? = false
+    @objc
+    public var enableContentEncoding = false
     private var dataOperationQueue = OperationQueue()
     private var builderFinished = false
     
@@ -208,7 +209,7 @@ public class DefaultNetworkConnection: NSObject, NetworkConnection {
         }
         
         var httpBody: Data? = requestData
-        if enableContentEncoding ?? false {
+        if enableContentEncoding {
             if let requestData = requestData {
                 let nsData = NSData(data: requestData)
                 httpBody = nsData.gzippedData(withCompressionLevel: 0.3)

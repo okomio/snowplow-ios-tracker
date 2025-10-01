@@ -65,13 +65,6 @@ public class NetworkConfiguration: SerializableConfiguration, ConfigurationProto
         set { _requestHeaders = newValue }
     }
     
-    private var _enableContentEncoding: Bool?
-    /// If enabled, then it enables gzip compression for POST requests
-    public var enableContentEncoding: Bool? {
-        get { return _enableContentEncoding ?? sourceConfig?.enableContentEncoding }
-        set { _enableContentEncoding = newValue }
-    }
-    
     // MARK: - Internal
     
     /// Fallback configuration to read from in case requested values are not present in this configuraiton.
@@ -140,12 +133,6 @@ public class NetworkConfiguration: SerializableConfiguration, ConfigurationProto
         return self
     }
     
-    @objc
-    public func enableContentEncoding(_ enableContentEncoding: Bool) -> Self {
-        self.enableContentEncoding = enableContentEncoding
-        return self
-    }
-    
     // MARK: - NSCopying
 
     @objc
@@ -157,7 +144,6 @@ public class NetworkConfiguration: SerializableConfiguration, ConfigurationProto
             copy = NetworkConfiguration(endpoint: endpoint ?? "", method: method )
         }
         copy?.customPostPath = customPostPath
-        copy?.enableContentEncoding = enableContentEncoding
         return copy!
     }
 
@@ -173,7 +159,6 @@ public class NetworkConfiguration: SerializableConfiguration, ConfigurationProto
         coder.encode(method.rawValue, forKey: "method")
         coder.encode(customPostPath, forKey: "customPostPath")
         coder.encode(requestHeaders, forKey: "requestHeaders")
-        coder.encode(enableContentEncoding, forKey: "enableContentEncoding")
     }
 
     required init?(coder: NSCoder) {
@@ -182,6 +167,5 @@ public class NetworkConfiguration: SerializableConfiguration, ConfigurationProto
         _method = HttpMethodOptions(rawValue: coder.decodeInteger(forKey: "method"))
         _customPostPath = coder.decodeObject(forKey: "customPostPath") as? String
         _requestHeaders = coder.decodeObject(forKey: "requestHeaders") as? [String : String]
-        _enableContentEncoding = coder.decodeObject(forKey: "enableContentEncoding") as? Bool
     }
 }

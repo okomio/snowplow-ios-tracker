@@ -184,6 +184,20 @@ class Emitter: NSObject, EmitterEventProcessing {
             }
         }
     }
+    
+    /// Enable gzip encoding for POST
+    private var _enableContentEncoding = EmitterDefaults.enableContentEncoding
+    var enableContentEncoding: Bool {
+        get {
+            return _enableContentEncoding
+        }
+        set(enableContentEncoding) {
+            _enableContentEncoding = enableContentEncoding
+            if builderFinished && networkConnection != nil {
+                setupNetworkConnection()
+            }
+        }
+    }
 
     private var _customPostPath: String?
     /// Custom endpoint path for POST requests.
@@ -207,20 +221,6 @@ class Emitter: NSObject, EmitterEventProcessing {
         }
         set(requestHeaders) {
             _requestHeaders = requestHeaders
-            if builderFinished && networkConnection != nil {
-                setupNetworkConnection()
-            }
-        }
-    }
-    
-    /// Enable gzip encoding for POST
-    private var _enableContentEncoding: Bool?
-    var enableContentEncoding: Bool? {
-        get {
-            return _enableContentEncoding
-        }
-        set(enableContentEncoding) {
-            _enableContentEncoding = enableContentEncoding
             if builderFinished && networkConnection != nil {
                 setupNetworkConnection()
             }

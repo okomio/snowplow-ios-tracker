@@ -237,11 +237,11 @@ class ServiceProvider: NSObject, ServiceProviderProtocol {
             emitter.protocol = self.networkConfiguration.protocol
             emitter.customPostPath = self.networkConfiguration.customPostPath
             emitter.requestHeaders = self.networkConfiguration.requestHeaders
-            emitter.enableContentEncoding = self.networkConfiguration.enableContentEncoding
             emitter.emitThreadPoolSize = self.emitterConfiguration.threadPoolSize
             emitter.byteLimitGet = self.emitterConfiguration.byteLimitGet
             emitter.byteLimitPost = self.emitterConfiguration.byteLimitPost
             emitter.serverAnonymisation = self.emitterConfiguration.serverAnonymisation
+            emitter.enableContentEncoding = self.emitterConfiguration.enableContentEncoding
             emitter.emitRange = self.emitterConfiguration.emitRange
             emitter.bufferOption = self.emitterConfiguration.bufferOption
             emitter.eventStore = self.emitterConfiguration.eventStore
